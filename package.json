@@ -14,5 +14,7 @@
     "type": "git",
     "url": "http://github.com//motionjs.git"
   },
-  "dependencies": {}
+  "dependencies": {
+    "backbone" : ">=0.2.0"
+  }
 }
