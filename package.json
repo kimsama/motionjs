@@ -12,9 +12,8 @@
   "licenses": [ "MIT" ],
   "repositories": {
     "type": "git",
-    "url": "http://github.com//motionjs.git"
+    "url": "http://github.com/motionjs.git"
   },
-  "dependencies": {
-    "backbone" : ">=0.2.0"
-  }
+  "dependencies": {}
 }
+
