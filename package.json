@@ -14,6 +14,9 @@
     "type": "git",
     "url": "http://github.com/motionjs.git"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "devDependencies" : {
+    'vows' : "*"
+  }
 }
 
