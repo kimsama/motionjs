@@ -16,16 +16,69 @@ in realtime javascript applications:
 
 ## API
 
+### Basics
+
+ `var motion = new Motion(tickRate)`
+
+ `tickRate` is the delay between snapshots in milliseconds
+
+ `motion`.`tickRate`
+ getter and setter to manipulate how long to wait between snapshots (in ms)
+
 ### Scene management
 
+var `id` = `motion`.`add(obj)`
+
+Register an existing scene object with motionjs. This can be a dom element, an
+object in a custom scene graph that you've built, or any other type of object.
+
+ **@return (string)** an id which is used when accessing the registered object
+ later on
+
+`motion`.`sample`(`id`, `getters`, `timeout`)
+
+ * `id` - the identifier returned from `add`
+ * `getters` - an object which specifies which properties to monitor and optionally how
+
+        {
+          x : function(obj) {
+            return obj.coords.x;
+          },
+          className : 'className'
+        }
+
+      the default is `propertyName : 'propertyName', but a function may be provided
+
+   
+ * `timeout` - the time (in ms) between sampling the provided properties
+
+`motion`.`link`(`id`, `setters`)
+
+Glue the `motion` object to it's scene object counterpart.
+
+ * `id` - the identifier returned from `add`
+ * `setters` - a list of properties that should be updated when a snapshot is received from a remote source.  This definition should include validation.
+
+        {
+          x : function(obj, value) {
+            // Validate the value and apply it if appropriate
+            if (value > 0 && value < 100) {
+              obj.coords.x = value;
+            }
+         }
+        }
+
+
+### An example
+
     var motion        = new Motion(),
-        sceneObjectId = motion.register(sceneObject);
+        sceneObjectId = motion.add(sceneObject);
 
     // Movement sampling
     // This is used for sampling user controlled object's positions
     motion.sample(sceneObjectId, {
       x : function(obj) {
-        return parseInt($(obj).css('left'));
+        return obj.coords.x;
       },
       className : 'className'
     ], 10);
@@ -35,7 +88,7 @@ in realtime javascript applications:
       x : function(obj, value) {
         // Validate the value and apply it if appropriate
         if (value > 0 && value < 100) {
-          $(obj).css('left', value + px)
+          obj.coords.x = value;
         }
       },
       className : 'className'
@@ -85,4 +138,3 @@ Node.js and in A grade browsers
 # License
 
 MIT - copyright Elijah Insua 2010
-
