@@ -13,6 +13,49 @@ in realtime javascript applications:
   * Input prediction
   * Lag compensation
 
+## API
+
+### Scene management
+
+    var motion        = new Motion(),
+        sceneObjectId = motion.register(sceneObject);
+
+    // Movement sampling
+    // This is used for sampling user controlled object's positions
+    motion.sample(sceneObjectId, {
+      x : function(obj) {
+        return parseInt($(obj).css('left'));
+      },
+      className : 'className'
+    ], 10);
+
+    // Movement updates (from server)
+    motion.link(sceneObjectId, {
+      x : function(obj, value) {
+        // Validate the value and apply it if appropriate
+        if (value > 0 && value < 100) {
+          $(obj).css('left', value + px)
+        }
+      },
+      className : 'className'
+    });
+
+### Networking
+
+    var clients = [{}, {}, {}];
+
+    motion.transport(clients, function sendMsg(obj) {
+      socketIO.send(obj);
+    });
+
+    socketIO.on('message', function(msg) {
+      if (msg && msg.motionType) {
+        motion.handle(msg);
+      } else {
+        // Handle other types of messages
+      }
+    });
+
 ## Entity Interpolation
 
 Entity interpolation is achieved by queuing scene updates until the next
