@@ -9,9 +9,9 @@ interval).
 
 Motion.js employs a few techniques to provide a seemingly "laggless" experience
 in realtime javascript applications:
-  * Entity interpolation
-  * Input prediction
-  * Lag compensation
+ * Entity interpolation
+ * Input prediction
+ * Lag compensation
 
 ## API
 
