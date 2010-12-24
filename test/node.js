@@ -4,7 +4,7 @@ var motion = require(__dirname + '/../lib/motion.js').motion,
 
 vows.describe('Motion.js').addBatch({
   // Motion Sanity
-  'Sanity' : {
+  'When creating a motion object' : {
     topic : function() {
       return motion();
     },
@@ -19,7 +19,7 @@ vows.describe('Motion.js').addBatch({
       obj.ticker.stop();
     }
   },
-  'Events': {
+  'When emitting events': {
     topic : function() {
       var m = motion();
 
@@ -31,28 +31,62 @@ vows.describe('Motion.js').addBatch({
       assert.equal(data.test, 'data');
     }
   }
-}/*,
-// Client Behavior
-{
-
-  'When a snapshot is taken' : {
+}).addBatch({
+  // Shared networking
+  'When a message is build with netMsg' : {
     topic : function() {
-      var motion = new Motion(), self = this;
-
-      motion.start();
-      motion.set('name', 'new value');
-      motion.send = function(type, data) {
-        motion.stop();
-        self.callback(null, type, data);
-      }
+      var m = motion(motion.CLIENT, { debug : true });
+      // 'sync' is a known-to-be-valid netMsg type
+      return { m : m, msg : m.netMsg('sync', 'data') };
     },
-    'it should be sent immediately with the diff' : function(err, type, diff) {
-      assert.equal(type, 'snapshot.diff');
-      assert.equal(diff.name, 'new value');
+    'the message should be valid' : function(err, data) {
+      assert.equal(data.msg.type, 'motion');
+      assert.equal(data.msg.motionType, 'sync');
+      assert.equal(data.msg.sync, 'data');
+      assert.isTrue(data.m.handle(data.msg));
+    }
+  },
+  'When an invalid message is built with netMsg' : {
+    topic : function() {
+      var m = motion(motion.CLIENT, { debug : true });
+      // 'tick' is a known-to-be-valid netMsg type
+      return { m : m, msg : m.netMsg('non-existant-type', 'data') };
+    },
+    'motion.handle(netMsg) should return false' : function(err, data) {
+      assert.isFalse(data.m.handle(data.msg));
+    }
+  }
+}).addBatch({
+  // Client Behavior
+  'When a controller is updated' : {
+    topic : function() {
+      var m = motion(motion.CLIENT, {
+            debug    : true,
+            syncRate : 100
+          }),
+          c = m.controller('dummy', 10),
+          cb = this.callback;
+      m.ticker.start();
+      
+      // Simulate movement
+      c.set({ x : 0 });
+      
+      setTimeout(function() {
+        c.set({ x : 100});
+      }, 40);
+
+      m.on('sync', function(msg) {
+        m.ticker.stop();
+        cb(null, msg);
+      });
+
+    },
+    'the updates should be pushed out in a group' : function(err, msg) {
+      assert.isTrue(msg.actions.dummy.length >= 10);
     }
   }
 
-},
+}/*,
 // Server Behavior
 {
 

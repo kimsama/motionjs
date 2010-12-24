@@ -7,7 +7,7 @@ all client activity on a central server.  The server contains a 'master' scene
 which sends updates to all affected clients when the scene changes (on a fixed
 interval).
 
-Motion.js employs a few techniques to provide a seemingly "laggless" experience
+Motion.js employs a few techniques to provide a seemingly "lagless" experience
 in realtime javascript applications:
 
  * Entity interpolation
@@ -29,7 +29,7 @@ in realtime javascript applications:
 
 var `id` = `motion`.`add(obj)`
 
-Register an existing scene object with motionjs. This can be a dom element, an
+Register an existing scene object with motionjs. This can be a DOM element, an
 object in a custom scene graph that you've built, or any other type of object.
 
  **@return (string)** an id which is used when accessing the registered object
@@ -103,9 +103,7 @@ Glue the `motion` object to it's scene object counterpart.
     });
 
     socketIO.on('message', function(msg) {
-      if (msg && msg.motionType) {
-        motion.handle(msg);
-      } else {
+      if (!motion.handle(msg)) {
         // Handle other types of messages
       }
     });
@@ -126,7 +124,7 @@ arrive at the actual server generated location.
 
 ## Lag compensation
 
-When a new snapshot is recieved by a client, the current scene values are
+When a new snapshot is received by a client, the current scene values are
 progressively updated over a period of time to avoid "jumpyness". Over a few
 milliseconds the entities the client was interacting with will be in their
 appropriate locations.
