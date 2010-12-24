@@ -79,19 +79,27 @@ vows.describe('Motion.js').addBatch({
         m.ticker.stop();
         cb(null, msg);
       });
-
     },
     'the updates should be pushed out in a group' : function(err, msg) {
       assert.isTrue(msg.actions.dummy.length >= 10);
     }
   }
+}).addBatch({
+  // Server Behavior
+  'When a server is running' : {
+    topic : function() {
+      var s     = motion(motion.SERVER, { syncRate : 50 }),
+          start = (new Date()).getTime(),
+          cb    = this.callback;
 
-}/*,
-// Server Behavior
-{
-
-
-
-
-
-}*/).export(module);
+      s.ticker.start();
+      s.on('sync', function(msg) {
+        cb(null, { start: start, msg : msg });
+        s.ticker.stop();
+      });
+    },
+    'snapshots are taken on an interval' : function(err, data) {
+      assert.isTrue(data.start + 50 <= (new Date()).getTime());
+    }
+  }
+}).export(module);
