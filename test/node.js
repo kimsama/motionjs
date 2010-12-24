@@ -8,14 +8,27 @@ vows.describe('Motion.js').addBatch({
     topic : function() {
       return motion();
     },
-    "call sites are sane" : function(err, motion) {
-      assert.isFunction(motion.setMode);
+    "call sites are sane" : function(err, obj) {
       assert.isNumber(motion.SERVER);
       assert.isNumber(motion.CLIENT);
+      assert.isNumber(motion.OBSERVER);
+      assert.isFunction(obj.on);
+      assert.isFunction(obj.emit);
+      assert.isFunction(obj.removeListener);
+      assert.isFunction(obj.removeAllListeners);
+      obj.ticker.stop();
+    }
+  },
+  'Events': {
+    topic : function() {
+      var m = motion();
 
-      assert.isSame(motion.setMode(motion.SERVER), motion);
+      m.on('test', this.callback);
+      m.emit('test', null,  { test : 'data'});
+      m.ticker.stop();
 
-
+    }, 'on/emit work as expected' : function(err, data) {
+      assert.equal(data.test, 'data');
     }
   }
 }/*,
