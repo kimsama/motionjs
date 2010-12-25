@@ -90,16 +90,22 @@ vows.describe('Motion.js').addBatch({
     topic : function() {
       var s     = motion(motion.SERVER, { syncRate : 50 }),
           start = (new Date()).getTime(),
-          cb    = this.callback;
+          cb    = this.callback,
+          msgs  = [];
 
       s.ticker.start();
       s.on('sync', function(msg) {
-        cb(null, { start: start, msg : msg });
-        s.ticker.stop();
+        msgs.push(msg);
       });
+      
+      setTimeout(function() {
+        s.ticker.stop();
+        cb(null, { start: start, msgs : msgs });
+      }, 1000);
     },
     'snapshots are taken on an interval' : function(err, data) {
-      assert.isTrue(data.start + 50 <= (new Date()).getTime());
+      assert.isTrue(data.msgs.length >= 19);
+      assert.isTrue(data.msgs.length <= 21);
     }
   }
 }).export(module);
