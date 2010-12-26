@@ -16,19 +16,16 @@ vows.describe('Motion.js').addBatch({
       assert.isFunction(obj.emit);
       assert.isFunction(obj.removeListener);
       assert.isFunction(obj.removeAllListeners);
-      obj.ticker.stop();
     }
   },
   'When emitting events': {
     topic : function() {
       var m = motion();
-
-      m.on('test', this.callback);
-      m.emit('test', null,  { test : 'data'});
-      m.ticker.stop();
-
-    }, 'on/emit work as expected' : function(err, data) {
+      m.on('test', this.callback)
+       .emit('test', null,  { test : 'data'}, 'arbitrary');
+    }, 'on/emit work as expected' : function(err, data, more) {
       assert.equal(data.test, 'data');
+      assert.equal(more, 'arbitrary');
     }
   }
 }).addBatch({
@@ -53,6 +50,7 @@ vows.describe('Motion.js').addBatch({
       return { m : m, msg : m.netMsg('non-existant-type', 'data') };
     },
     'motion.handle(netMsg) should return false' : function(err, data) {
+      // this allows for 
       assert.isFalse(data.m.handle(data.msg));
     }
   }
@@ -69,10 +67,10 @@ vows.describe('Motion.js').addBatch({
       m.ticker.start();
       
       // Simulate movement
-      c.set({ x : 0 });
+      c.set({ 'up' : 0 });
       
       setTimeout(function() {
-        c.set({ x : 100});
+        c.set({ 'up' : 100});
       }, 40);
 
       m.on('sync', function(msg) {
@@ -108,4 +106,44 @@ vows.describe('Motion.js').addBatch({
       assert.isTrue(data.msgs.length <= 21);
     }
   }
-}).export(module);
+}).addBatch({
+  // Scene Management
+  'When an plain old object is wrapped by motion' : {
+    topic : function() {
+      var m = motion(motion.CLIENT, { debug: true }),
+          scene = {
+            ball : {
+              x : 100,
+              y : 200
+            }
+          },
+          mScene = m.scene(scene),
+          cb = this.callback;
+      
+      b = mScene.wrap('ball', scene.ball, function validate(k, v) { return true; });
+
+      // move the ball 10 units on the x axis
+      mScene.obj('ball').set('x', 110);
+
+      // move the ball to 0 on the y axis (200 units)
+      b.set('y', 0);
+
+      m.on('snapshot', function(snapshot) {
+        cb(null, { scene : mScene, snapshot: snapshot});
+        m.ticker.stop();
+      });
+
+      m.ticker.start();
+    },
+    'changes in the scene should be reflected in the snapshot' : function(err, obj)
+    {
+      // Because this motion instance is in debug mode, we can inspect the delta cache
+      assert.equal(obj.snapshot.deltas.ball.x, 10);
+      assert.equal(obj.snapshot.deltas.ball.y, -200);
+
+    }
+  }
+})/*.addBatch({
+  // Communication testing
+  ''
+}*/.export(module);
