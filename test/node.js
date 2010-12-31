@@ -119,14 +119,20 @@ vows.describe('Motion.js').addBatch({
           },
           mScene = m.scene(scene),
           cb = this.callback;
-      
-      b = mScene.wrap('ball', scene.ball, function validate(k, v) { return true; });
+
+      b = mScene.wrap('ball', scene.ball, function validate(k, v) { 
+        return (['x','y'].indexOf(k) !== -1) ? true : false; 
+      });
 
       // move the ball 10 units on the x axis
       mScene.obj('ball').set('x', 110);
 
       // move the ball to 0 on the y axis (200 units)
       b.set('y', 0);
+
+      // When validation fails the property is not set
+      b.set('z', 100);
+      assert.isUndefined(b.get('z'))
 
       m.on('snapshot', function(snapshot) {
         cb(null, { scene : mScene, snapshot: snapshot});
@@ -140,7 +146,6 @@ vows.describe('Motion.js').addBatch({
       // Because this motion instance is in debug mode, we can inspect the delta cache
       assert.equal(obj.snapshot.deltas.ball.x, 10);
       assert.equal(obj.snapshot.deltas.ball.y, -200);
-
     }
   }
 })/*.addBatch({
