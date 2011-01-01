@@ -16,7 +16,9 @@
   },
   "dependencies": {},
   "devDependencies" : {
-    'vows' : "*"
-  }
+    "async_testing" : "*",
+    "backbone" : "*"
+  },
+  "main" : "lib/motion"
 }
 
