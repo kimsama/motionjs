@@ -50,7 +50,6 @@ ts.test_NetworkObject_resume = function(t) {
 };
 
 ts.test_network_object_timings = function(t) {
-
   t.finish();
 };
 
@@ -70,28 +69,23 @@ ts.test_client_creation = function(t) {
 }
 
 ts.test_client_server_handshake = function(t) {
-  var p = {},
-      serverTransport = new motion.models.NetworkTransport(),
-      clientTransport = new motion.models.NetworkTransport(), s, c;
-
-  s = motion(motion.SERVER);
-
-  c = motion(motion.CLIENT);
+  var s = motion(motion.SERVER),
+      c = motion(motion.CLIENT);
 
   // Setup the send/recv pipe
-  s.get('transport').send = function() {
-    c.get('transport').recv.apply(c.get('transport'), arguments);
+  s.get('transport').send = function(msg) {
+    c.get('transport').recv(msg);
   };
-  
-  c.get('transport').send = function() {
-    s.get('transport').recv.apply(s.get('transport'), arguments);
+
+  c.get('transport').send = function(msg) {
+    s.get('transport').recv(msg);
   }
 
   c.bind('client:handshake', function(msg) {
     assert.ok(msg.data.status === motion.OK);
-    c.disconnect();
+    this.disconnect();
   });
-  
+
   c.bind('client:disconnected', function(msg) {
     assert.ok(msg.data.status === motion.OK);
     t.finish();
