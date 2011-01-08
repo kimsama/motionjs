@@ -61,11 +61,6 @@ basic.test_NetworkObject_resume = function(t) {
   },50);
 };
 
-basic.test_network_object_timings = function(t) {
-  t.done();
-};
-
-
 basic.test_server_creation = function(t) {
   var m = motion(motion.SERVER);
   t.ok(m);

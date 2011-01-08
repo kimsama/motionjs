@@ -1,6 +1,9 @@
-var tests   = require(__dirname + '/../shared/tests/index'),
-    testDir = "/shared/tests/";
-
 require('nodeunit/reporters/default').run([
-  testDir + 'basic.js'
+  '/shared/tests/basic.js',
+  '/shared/tests/scene.js',
+  '/shared/tests/validation.js',
+  '/shared/tests/lag.js',
+  '/shared/tests/input.js',
+  '/shared/tests/animation.js',
+  '/shared/tests/interpolation.js'
 ]);
