@@ -16,7 +16,7 @@
   },
   "dependencies": {},
   "devDependencies" : {
-    "async_testing" : "*",
+    "nodeunit" : "*",
     "backbone" : "*"
   },
   "main" : "lib/motion"
