@@ -131,7 +131,7 @@ appropriate locations.
 
 # Where does it run?
 
-Node.js and in A grade browsers
+Node.js and browsers
 
 # License
 

@@ -1,9 +1,15 @@
-require('nodeunit/reporters/default').run([
-  '/shared/tests/basic.js',
-  '/shared/tests/scene.js',
-  '/shared/tests/validation.js',
-  '/shared/tests/lag.js',
-  '/shared/tests/input.js',
-  '/shared/tests/animation.js',
-  '/shared/tests/interpolation.js'
-]);
+var suites = [
+  'basic',
+  'scene',
+  'validation',
+  'lag',
+  'input',
+  'animation',
+  'interpolation'
+];
+
+suites.map(function(suite) {
+  if (process.argv.length < 3 || process.argv[2] === suite) {
+    require('nodeunit/reporters/default').run(['/test/shared/tests/' + suite + '.js']);
+  }
+});

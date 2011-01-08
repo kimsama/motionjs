@@ -13,3 +13,10 @@ if (typeof exports !== 'undefined') {
  */
 
 var input = motionTests.input = {};
+
+input.device_input_should_be_mapped_to_actions = function(t) {
+  var device = new (motion.models.InputDevice)();
+
+
+  t.done();
+}
