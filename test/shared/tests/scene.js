@@ -56,10 +56,10 @@ scene.test_creation_and_traversal = function(t) {
 
   sceneChildren = s.get('children'),
   player1       = sceneChildren.byProperty('name', 'tank'),
-  paddle        = player1.get('children').byProperty('name', 'turret');
+  turret        = player1.get('children').byProperty('name', 'turret');
 
   t.ok(sceneChildren.length === 2);
-  t.ok(paddle.get('name') === "turret")
+  t.ok(turret.get('name') === "turret")
   t.done();
 };
 
@@ -74,6 +74,7 @@ scene.test_snapshot = function(t) {
 
   t.ok(snapshot.children.length === 2);
   t.ok(typeof snapshot.children[0] === 'undefined');
+  t.ok(typeof snapshot.children[1].children[0] === 'undefined');
   t.ok(snapshot.children[1].children[1].direction === 90);
 
   t.done();

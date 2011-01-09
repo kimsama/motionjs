@@ -1,15 +1,19 @@
 var suites = [
-  'basic',
-  'scene',
-  'validation',
-  'lag',
-  'input',
-  'animation',
-  'interpolation'
+  '/test/shared/tests/basic.js',
+  '/test/shared/tests/scene.js',
+  '/test/shared/tests/validation.js',
+  '/test/shared/tests/lag.js',
+  '/test/shared/tests/input.js',
+  '/test/shared/tests/animation.js',
+  '/test/shared/tests/interpolation.js'
 ];
 
-suites.map(function(suite) {
-  if (process.argv.length < 3 || process.argv[2] === suite) {
-    require('nodeunit/reporters/default').run(['/test/shared/tests/' + suite + '.js']);
-  }
-});
+if (process.argv.length > 2) {
+  suites.map(function(suite) {
+    if (process.argv[2] === suite) {
+      require('nodeunit/reporters/default').run([suite]);
+    }
+  });
+} else {
+  require('nodeunit/reporters/default').run(suites);
+}
