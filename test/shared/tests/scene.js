@@ -73,6 +73,7 @@ scene.test_snapshot = function(t) {
   snapshot = s.snapshot();
 
   t.ok(snapshot.children.length === 2);
+  t.ok(typeof snapshot.children[0] === 'undefined');
   t.ok(snapshot.children[1].children[1].direction === 90);
 
   t.done();
