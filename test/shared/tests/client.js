@@ -6,10 +6,10 @@ motion = (typeof motion === 'undefined')                     ?
           motion;
 
 if (typeof exports !== 'undefined') {
-  var motionTests = exports
+  var motionTests = exports;
 }
 /*
  * END SETUP
  */
 
-var validation = motionTests.validation = {};
+var client          = motionTests.client = {};

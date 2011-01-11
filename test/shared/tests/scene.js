@@ -2,7 +2,7 @@
  *  SETUP
  */
 motion = (typeof motion === 'undefined')                     ?
-          require(__dirname + '/../../../lib/motion').motion :
+          require(__dirname + '/../../../public/lib/motion').motion :
           motion;
 
 if (typeof exports !== 'undefined') {
@@ -63,7 +63,7 @@ scene.test_creation_and_traversal = function(t) {
   t.done();
 };
 
-scene.test_snapshot = function(t) {
+scene.test_snapshot_creation = function(t) {
   var s = buildTankScene(), snapshot;
 
   s.get('children').byProperty('name', 'tank')
@@ -78,4 +78,4 @@ scene.test_snapshot = function(t) {
   t.ok(snapshot.children[1].children[1].direction === 90);
 
   t.done();
-}
+};

@@ -19,6 +19,6 @@
     "nodeunit" : "*",
     "backbone" : "*"
   },
-  "main" : "lib/motion"
+  "main" : "public/lib/motion"
 }
 

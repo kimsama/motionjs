@@ -2,7 +2,7 @@
  *  SETUP
  */
 motion = (typeof motion === 'undefined')                     ?
-          require(__dirname + '/../../../lib/motion').motion :
+          require(__dirname + '/../../../public/lib/motion').motion :
           motion;
 
 if (typeof exports !== 'undefined') {
@@ -90,7 +90,7 @@ basic.test_client_server_handshake = function(t) {
 
   c.bind('client:handshake', function(msg) {
     t.ok(msg.data.status === motion.OK);
-    this.disconnect();
+    this.get('transport').disconnect();
   });
 
   c.bind('client:disconnected', function(msg) {
@@ -98,6 +98,6 @@ basic.test_client_server_handshake = function(t) {
     t.done();
   });
 
-  c.connect();
+  c.get('transport').connect();
   motion.stop().free(s).free(c);
 }

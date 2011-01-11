@@ -5,7 +5,10 @@ var suites = [
   '/test/shared/tests/lag.js',
   '/test/shared/tests/input.js',
   '/test/shared/tests/animation.js',
-  '/test/shared/tests/interpolation.js'
+  '/test/shared/tests/interpolation.js',
+  '/test/shared/tests/client.js',
+  '/test/shared/tests/server.js',
+  '/test/shared/tests/pipe.js'
 ];
 
 if (process.argv.length > 2) {

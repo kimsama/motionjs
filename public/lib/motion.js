@@ -21,7 +21,7 @@
         }
       },
       // Create a network message
-      netMsg = function(type, data) {
+      netMsg = motion.netMsg = function(type, data) {
         var m = {
           type       : 'motion',
           motion     : type,
@@ -101,17 +101,26 @@
   //
 
   models.NetworkTransport = Backbone.Model.extend({
+    connect : function() {
+      var self = this.toJSON();
+      delete self.endpoint;
+      this.send(netMsg('client:connecting', self));
+    },
+    disconnect : function() {
+      this.send(netMsg('client:disconnecting', this.toJSON()));
+    },
     send : function(msg) {
-      console.warn("Using default noop transport.send");
+      throw new Error("Using default noop transport.send");
     },
     isMotionMsg : function(msg) {
       return (msg && msg.type && msg.type === "motion");
     },
     recv : function(msg) {
-      var handlers = this.msgHandlers, endpoint = this.get('endpoint');
+      var handlers = this.msgHandlers,
+          endpoint = this.get('endpoint');
 
       msg.latency = msg.time - now;
-      
+
       if (!this.isMotionMsg(msg)) {
         this.trigger('error:unhandled-message', msg);
         return;
@@ -121,41 +130,42 @@
         this.trigger('error:no-endpoint');
         return;
       }
-      
-      // TODO: instead of using handlers, utilize backbone's events.
-      var res = (handlers[msg.motion]) ? 
-                 handlers[msg.motion](endpoint, msg || {}) :
-                 false;
-      endpoint.trigger(msg.motion, msg, res);
-      if (res) {
-        this.send(res);
+
+      endpoint.trigger(msg.motion, this, msg);
+    }
+  });
+
+  models.InMemoryTransport = models.NetworkTransport.extend({
+    initialize : function() {
+      if (this.get('endpoint') instanceof models.NetworkServer) {
+        this.send = function(msg) {
+          var client = this.get('endpoint')
+                           .get('clients').get(msg.client_id);
+          console.log(client, msg.client_id)
+          if (client) {
+            client.get('transport').recv(msg);
+          }
+        }
       }
     },
-    msgHandlers : {
-      'client:connecting' : function(endpoint, msg) {
-        var clients = endpoint.get('clients');
-        msg.data.id = motion.guid();
+    connect : function(endpoint) {
+      var self      = this,
+          transport = endpoint.get('transport');
 
-        clients.add(new models.Client(msg.data));
-        return netMsg('client:handshake', {
-          id     : msg.data.id,
-          status : motion.OK,
-          latency : msg.latency
-        });
-      },
-      'client.handshake'  : function(endpoint, msg) {
-        return netMsg('client:connected', {
-          latency : msg.latency
-        });
-      },
-      'client:connected'  : function(endpoint, msg) {},
-      'client:disconnecting' : function(endpoint, msg) { 
-        return netMsg('client:disconnected', { 
-          status : motion.OK,
-          latency : msg.latency
-        });
-      }
-    }
+      self.send = function(msg) {
+        
+        msg.client_id = endpoint.id;
+        
+        console.log(endpoint.id)
+        transport.recv.call(transport, msg)
+      };
+
+      setTimeout(function() {
+        //endpoint.get('clients').add(self.get('endpoint'));
+        models.NetworkTransport.prototype.connect.call(self);
+      }, 0);
+    },
+    disconnect : function() {}
   });
 
   // SCENE
@@ -263,17 +273,21 @@
     },
   });
   
+  // Setup transport to use for all instances
+  motion.Transport = models.NetworkTransport;
+  
   models.NetworkEndpoint = models.TickHandler.extend({
     initialize : function() {
-      this.set({ 'transport' : new models.NetworkTransport({ endpoint : this }) });
-    }
-  })
+      this.set({ 'transport' : new motion.Transport({ endpoint : this }) });
+      this.setupEvents();
+    },
+    setupEvents : function() {}
+  });
 
   //
   // SERVER
   //
   models.Client  = models.NetworkEndpoint.extend({
-    
   });
   
   models.ClientCollection = Backbone.Collection.extend({
@@ -284,6 +298,38 @@
     initialize : function() {
       this.set({ clients : new models.ClientCollection() });
       models.NetworkEndpoint.prototype.initialize.apply(this, arguments);
+    },
+    setupEvents : function() {
+      this.bind('client:connecting', function(transport, msg) {
+        var clients = this.get('clients'),
+            client  = new models.Client(msg.data);
+
+        client.id = motion.guid();
+        
+        clients.add(client);
+
+        transport.send(netMsg('client:handshake', {
+          id     : client.id,
+          status : motion.OK,
+          latency : msg.latency
+        }));
+      });
+      
+      this.bind('client:handshake', function(transport, msg) {
+        console.log(msg)
+        // TODO: ensure the client is using their key.
+        transport.send(netMsg('client:connected', {
+          latency : msg.latency
+        }));
+      });
+      /*
+      'client:connected'  : function(endpoint, msg) {},
+      this.bind('client:disconnecting' :function(endpoint, msg) { 
+        return netMsg('client:disconnected', { 
+          status : motion.OK,
+          latency : msg.latency
+        });
+      }*/
     }
   });
   
@@ -291,11 +337,20 @@
   // CLIENT
   //
   models.NetworkClient = models.NetworkEndpoint.extend({
-    connect : function() {
-      this.get('transport').send(netMsg('client:connecting', this.toJSON()));
-    },
-    disconnect : function() {
-      this.get('transport').send(netMsg('client:disconnecting', this.toJSON()));
+    setupEvents : function() {
+      this.bind('client:handshake', function(transport, msg) {
+        this.set({ id : msg.data.id });
+
+        transport.send(netMsg('client:handshake', {
+          latency : msg.latency
+        }));
+      });
+      
+      /*this.bind('client:handshake', function(transport, msg) {
+        transport.send(netMsg('client:connected', {
+          latency : msg.latency
+        }));
+      });*/
     }
   });
 
