@@ -13,7 +13,7 @@ if (typeof exports !== 'undefined') {
  */
 
 var basic = motionTests.basic = {};
-
+/*
 basic.test_callsites = function(t) {
   t.ok(motion.models);
   t.done();
@@ -73,21 +73,15 @@ basic.test_client_creation = function(t) {
   t.ok(m);
   motion.stop().free(m);
   t.done();
-}
+}*/
 
 basic.test_client_server_handshake = function(t) {
-  var s = motion(motion.SERVER),
-      c = motion(motion.CLIENT);
+  motion.Transport = motion.models.InMemoryTransport;
+  var s = new motion.models.NetworkServer(),
+      c = new motion.models.NetworkClient();
 
-  // Setup the send/recv pipe
-  s.get('transport').send = function(msg) {
-    c.get('transport').recv(msg);
-  };
-
-  c.get('transport').send = function(msg) {
-    s.get('transport').recv(msg);
-  }
-
+  c.get('transport').connect(s);
+  c.bind("all", function(name) { console.log(name); })
   c.bind('client:handshake', function(msg) {
     t.ok(msg.data.status === motion.OK);
     this.get('transport').disconnect();
@@ -98,6 +92,6 @@ basic.test_client_server_handshake = function(t) {
     t.done();
   });
 
-  c.get('transport').connect();
+  c.get('transport').disconnect();
   motion.stop().free(s).free(c);
 }
