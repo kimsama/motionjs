@@ -42,7 +42,7 @@ console.log("here")
 
   c1.bind('chat:message', function(msg) {
     t.ok(msg.data === "hello player 1");
-    c1.get('transport').send(motoin.netMessage('chat:message', 'hello'));
+    c1.get('transport').send(motion.netMsg('chat:message', 'hello'));
   });
 
   setTimeout(function preventDelay() {

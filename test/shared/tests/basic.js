@@ -76,12 +76,12 @@ basic.test_client_creation = function(t) {
 }*/
 
 basic.test_client_server_handshake = function(t) {
+debugger;
   motion.Transport = motion.models.InMemoryTransport;
   var s = new motion.models.NetworkServer(),
       c = new motion.models.NetworkClient();
 
-  c.get('transport').connect(s);
-  c.bind("all", function(name) { console.log(name); })
+
   c.bind('client:handshake', function(msg) {
     t.ok(msg.data.status === motion.OK);
     this.get('transport').disconnect();
@@ -91,6 +91,10 @@ basic.test_client_server_handshake = function(t) {
     t.ok(msg.data.status === motion.OK);
     t.done();
   });
+
+  c.get('transport').connect(s);
+
+  c.get('transport').bind("all", function(name, msg) { console.log("CLIENT TRANSPORT", name, msg.motion); })
 
   c.get('transport').disconnect();
   motion.stop().free(s).free(c);

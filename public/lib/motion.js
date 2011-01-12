@@ -127,12 +127,12 @@
     },
     recv : function(msg) {
       console.log("RECV", msg.motion)
-      this.trigger('transport:recv', [msg]);
+      this.trigger('transport:recv', msg);
       var handlers = this.msgHandlers,
           endpoint = this.get('endpoint');
 
       msg.latency = msg.time - now;
-
+debugger;
       if (!this.isMotionMsg(msg)) {
         this.trigger('error:unhandled-message', msg);
         return;
@@ -142,7 +142,7 @@
         this.trigger('error:no-endpoint');
         return;
       }
-
+debugger;
       endpoint.trigger(msg.motion, this, msg);
     }
   });
@@ -152,12 +152,12 @@
 
       if (this.get('endpoint') instanceof models.NetworkServer) {
         this.send = function(msg) {
-          this.trigger('transport:send', [msg]);
-          console.log(msg);
+        console.log("SERVER SENDS", msg.motion)
+          this.trigger('transport:send', msg);
           var client = this.get('endpoint')
                            .get('clients')
                            .get(msg.client_id);
-
+console.log(client)
           if (client) {
             client.get('transport').recv(msg);
           }
@@ -165,6 +165,7 @@
       }
     },
     connect : function(endpoint) {
+
       if (!endpoint) {
         throw new Error('Please provide an endpoint to connect to')
       }
@@ -173,9 +174,9 @@
 
       self.send = function(msg) {
         msg.client = self;
-        this.trigger('transport:send', [msg])
+        this.trigger('transport:send', msg)
         msg.client_id = endpoint.id || null;
-        transport.recv.call(self, msg)
+        transport.recv.call(transport, msg)
       };
 
       setTimeout(function() {
@@ -194,13 +195,17 @@
       this.set({ 'transport' : new motion.Transport({ endpoint : this }) });
       this.setupEvents();
     },
-    setupEvents : function() {}
+    setupEvents : function() {
+
+      throw new Error('');
+    }
   });
 
   //
   // SERVER
   //
   models.Client  = models.NetworkEndpoint.extend({
+    setupEvents : function() {}
   });
 
   models.ClientCollection = Backbone.Collection.extend({
@@ -213,20 +218,12 @@
       models.NetworkEndpoint.prototype.initialize.apply(this, arguments);
     },
     setupEvents : function() {
-
       this.bind('client:connecting', function(transport, msg) {
-        if (msg.client) {
-          console.log("CLIENT")
-        }
         var clients = this.get('clients'),
             client  = new models.Client(msg.data);
 
-        client.id = motion.guid();
-
-        clients.add(client);
-console.log("here")
         transport.send(netMsg('client:handshake', {
-          id     : client.id,
+          id     : motion.guid(),
           status : motion.OK,
           latency : msg.latency
         }));
@@ -254,6 +251,9 @@ console.log("here")
   // CLIENT
   //
   models.NetworkClient = models.NetworkEndpoint.extend({
+    initialize : function() {
+      models.NetworkEndpoint.prototype.initialize.apply(this, arguments);
+    },
     setupEvents : function() {
       this.bind('client:handshake', function(transport, msg) {
         this.set({ id : msg.data.id });
